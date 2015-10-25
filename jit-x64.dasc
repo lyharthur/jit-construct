@@ -31,24 +31,36 @@ int main(int argc, char *argv[])
 	unsigned int maxpc = 0;
 	int pcstack[MAX_NESTING];
 	int *top = pcstack, *limit = pcstack + MAX_NESTING;
-
+	int count = 1;
 	// Function prologue.
 	|  push PTR
 	|  mov  PTR, rdi      // rdi store 1st argument
-
 	for (char *p = read_file(argv[1]); *p; p++) {
+		count = 1;
 		switch (*p) {
 		case '>':
-			|  inc  PTR
+			while(*(++p) == '>')
+				count++;
+			|  add  PTR,count
+			p--;
 			break;
 		case '<':
-			|  dec  PTR
+			while(*(++p) == '<')
+				count++;
+			|  sub  PTR,count
+			p--;
 			break;
 		case '+':
-			|  inc  byte [PTR]
+			while(*(++p) == '+')
+				count++;
+			|  add  byte [PTR],count
+			p--;
 			break;
 		case '-':
-			|  dec  byte [PTR]
+			while(*(++p) == '-')
+				count++;
+			|  sub  byte [PTR],count
+			p--;
 			break;
 		case '.':
 			|  movzx edi, byte [PTR]
